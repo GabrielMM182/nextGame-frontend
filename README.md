@@ -72,6 +72,19 @@ src/
 ```
 -----------------------------------------------
 
+## Objetivo
+Desenvolvimento de um frontend moderno em React para uma plataforma de recomendação de jogos, integrando com um backend existente que utiliza OpenAI para gerar recomendações e RAWG API para detalhes dos jogos.
+
+## Tecnologias Utilizadas
+- **Framework**: React com TypeScript
+- **Bundler**: Vite
+- **Gerenciamento de Estado**: Zustand
+- **Chamadas API**: Axios
+- **Cache e Async**: React Query
+- **Estilização**: TailwindCSS
+- **Roteamento**: React Router
+
+## Estrutura de Diretórios
 ```
 src/
 ├── assets/               # Recursos estáticos (imagens, fontes)
@@ -82,7 +95,7 @@ src/
 ├── hooks/                # Custom hooks
 ├── pages/                # Páginas/rotas da aplicação
 ├── services/             # Serviços e integrações com APIs
-│   └── api/              # Configuração do Axios e endpoints
+│   └── api/              # Configuração do Axios
 ├── store/                # Gerenciamento de estado com Zustand
 ├── types/                # Definições de tipos TypeScript
 ├── utils/                # Funções utilitárias
@@ -91,53 +104,61 @@ src/
 └── vite-env.d.ts         # Tipos do Vite
 ```
 
+## Componentes Principais
 
+### Páginas
+1. **HomePage**: Tela inicial com seletor até de 6 tags e exibição de resultados de busca
+2. **GameDetailsPage**: Página detalhada de um jogo específico, Exibição de informações como título, descrição, plataformas, gêneros e Galeria de screenshots do jogo
 
-## Funcionalidades Implementadas
+### Componentes de Layout
+- **Layout**: Estrutura base com header, footer e container para conteúdo via Outlet
 
-1. **Página Inicial (HomePage)**
-   - Seleção de até 6 tags/gêneros de jogos
-   - Busca de recomendações baseada nas tags selecionadas
-   - Exibição dos resultados da busca
+### Componentes de Features
+- **TagSelector**: Interface para selecionar tags/gêneros de jogos
+- **SearchResults**: Exibe os resultados de busca de jogos recomendados
 
-2. **Página de Detalhes (GameDetailsPage)**
-   - Visualização detalhada de um jogo específico
-   - Exibição de informações como título, descrição, plataformas, gêneros
-   - Galeria de screenshots do jogo
+### Componentes Comuns
+- **LoadingSpinner**: Feedback de Indicador de carregamento
+- **ErrorMessage**: Componente para exibição de erros
 
-3. **Componentes Reutilizáveis**
-   - TagSelector: Gerencia a seleção de tags/gêneros
-   - SearchResults: Exibe os resultados de busca
-   - LoadingSpinner: Feedback de carregamento
-   - ErrorMessage: Tratamento de erros visuais
+## Custom Hooks
+- **useGameApi**: Hook principal que encapsula toda a lógica de comunicação com a API:
+  - `useTags()`: Para buscar tags/gêneros disponíveis
+  - `useGameDetails()`: Para detalhes de um jogo específico
+  - `useSearchResults()`: Para resultados de busca
+  - `useSearchGames()`: Mutação para realizar busca
 
-## Integração com o Backend
+## Estado Global (Zustand)
+- Tags selecionadas pelo usuário
+- ID da busca atual
+- Funções para adicionar/remover tags
 
-- Configuramos o Axios para se comunicar com a API em `localhost:3000`
-- Criamos um serviço para encapsular as chamadas à API:
-  - `getTags()`: Obtém tags aleatórias de gêneros de jogos
-  - `searchGames()`: Envia tags para busca de recomendações
-  - `getGameDetails()`: Obtém detalhes completos de um jogo específico
+## Integração com Backend
+- Integração via Axios configurado para acessar `http://localhost:3000`
+- Uso de React Query para cache eficiente e estados de loading/error
 
-- Implementamos o React Query para cache eficiente e gerenciamento de estado das requisições
+## Fluxo de Uso
+1. Usuário seleciona até 6 tags/gêneros de jogos
+2. Ao clicar em buscar, os gêneros são enviados para o backend
+3. Backend consulta OpenAI e RAWG API, retorna ID da busca
+4. Frontend exibe resultados baseados neste ID
+5. Usuário pode clicar em um jogo para ver detalhes completos
 
-## Gerenciamento de Estado
+## Aspectos Técnicos Importantes
+- Tipagem forte com TypeScript para segurança de dados
+- Tratamento centralizado de erros e estados de loading
+- Componentes reutilizáveis e modularizados
+- Custom hooks para encapsular lógica de negócio
+- Design responsivo com TailwindCSS
 
-Utilizamos Zustand para gerenciar o estado global da aplicação, especificamente:
-- Tags/gêneros selecionados pelo usuário
-- ID da busca atual para carregamento de resultados
-- Funções para adicionar/remover tags e gerenciar o processo de busca
+## Decisões Arquiteturais
+- Separação de responsabilidades com services e hooks
+- Estado distribuído entre React Query (server state) e Zustand (client state)
+- Layout consistente via React Router e componente Layout
+- Encapsulamento da lógica de API em custom hooks para reuso e testabilidade
 
-## Boas Práticas Implementadas
+Essa arquitetura fornece uma base sólida, escalável e de fácil manutenção para a plataforma de recomendação de jogos, além de oferecer uma experiência de usuário fluida e responsiva.
 
-1. **Tipagem forte com TypeScript** para todos os componentes e funções
-2. **Componentização** para reuso e manutenção facilitada
-3. **Tratamento de erros** consistente com feedback visual
-4. **Feedback de carregamento** para melhorar a experiência do usuário
-5. **Proxies no Vite** para resolver questões de CORS
-6. **Design responsivo** com TailwindCSS
-
-Os componentes foram projetados para serem declarativos, reutilizáveis e fáceis de manter, seguindo os princípios de Single Responsibility e separação de responsabilidades.
 
 ### How to Use:
 1. Save the file as `install-deps.ts` and make it executable:  
