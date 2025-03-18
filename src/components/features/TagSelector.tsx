@@ -1,14 +1,19 @@
 import React from 'react';
 import { GameTag } from '../../types/game';
 import { useGameStore } from '../../store/useGameStore';
+import ShakableTag from './ShakableTag';
+import RefreshTagsButton from '../features/RefrashTagsButton';
 
 interface TagSelectorProps {
   availableTags: { tags: string[] } | GameTag[];
+  refetchTags?: () => void;
+  isRefetching?: boolean;
 }
 
-const TagSelector: React.FC<TagSelectorProps> = ({ availableTags }) => {
+const TagSelector: React.FC<TagSelectorProps> = ({ availableTags, refetchTags, isRefetching = false }) => {
   const { selectedTags, addTag, removeTag } = useGameStore();
-  
+  const [lastAddedTagId, setLastAddedTagId] = React.useState<string | null>(null);
+
   // processar o array apenas quando availableTags mudar, melhorando a performance
   const processedTags = React.useMemo(() => {
     // Se for um objeto com propriedade 'tags' como o json está vindo no formato object/json entao precsiando extrair o array dentro do objeto
@@ -28,61 +33,106 @@ const TagSelector: React.FC<TagSelectorProps> = ({ availableTags }) => {
     return [];
   }, [availableTags]);
   
+  const handleAddTag = (tag: GameTag) => {
+    addTag(tag);
+    setLastAddedTagId(tag.id);
+    setTimeout(() => setLastAddedTagId(null), 500); // Duração da animação
+  };
+
+
   const isSelected = (tag: GameTag) => {
-    return selectedTags.some(t => t.id === tag.id);
+    return selectedTags.some(t => t.name === tag.name);
   };
   
   const isTagsLimitReached = selectedTags.length >= 6;
 
-  console.log('availableTags:', availableTags);
-  console.log('type:', typeof availableTags);
-  console.log('isArray:', Array.isArray(availableTags));
+  const handleRefresh = () => {
+    if (refetchTags) {
+      refetchTags();
+    }
+  };
+
+  const availableUnselectedTags = processedTags.filter(tag => !isSelected(tag));
+
+  // console.log('availableTags:', availableTags);
+  // console.log('type:', typeof availableTags);
+  // console.log('isArray:', Array.isArray(availableTags));
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        {selectedTags.length > 0 ? (
-          selectedTags.map(tag => (
-            <div 
-              key={tag.id}
-              className="bg-indigo-100 border-2 border-indigo-500 text-indigo-800 px-3 py-1 rounded-full flex items-center"
-            >
-              <span className="mr-1">{tag.name}</span>
-              <button
-                onClick={() => removeTag(tag.id)}
-                className="text-indigo-500 hover:text-indigo-700 focus:outline-none"
+      {/* Selected Tags Section */}
+      <div>
+        <h3 className="text-lg font-medium mb-2">Gêneros selecionados ({selectedTags.length}/6):</h3>
+        <div className="flex flex-wrap gap-2">
+          {selectedTags.length > 0 ? (
+            selectedTags.map(tag => (
+              <div 
+                key={tag.id}
+                className="bg-indigo-100 border-2 border-indigo-500 text-indigo-800 px-3 py-1 rounded-full flex items-center"
               >
-                <span className="sr-only">Remover</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          ))
-        ) : (
-          <div className="text-gray-500 italic">Nenhum gênero selecionado</div>
-        )}
+                <span className="mr-1">{tag.name}</span>
+                <button
+                  onClick={() => removeTag(tag.id)}
+                  className="text-indigo-500 hover:text-indigo-700 focus:outline-none"
+                >
+                  <span className="sr-only">Remover</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="text-gray-500 italic">Nenhum gênero selecionado</div>
+          )}
+        </div>
       </div>
       
+      {/* Available Tags Section with Refresh Button */}
       <div>
-        <h3 className="text-lg font-medium mb-2">Gêneros disponíveis:</h3>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-medium">Gêneros disponíveis:</h3>
+          {refetchTags && (
+            <RefreshTagsButton onRefresh={handleRefresh} isLoading={isRefetching} />
+          )}
+        </div>
+        
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-          {processedTags.map(tag => (
-            <button
-              key={tag.id}
-              onClick={() => !isSelected(tag) && !isTagsLimitReached && addTag(tag)}
-              disabled={isSelected(tag) || isTagsLimitReached}
-              className={`px-3 py-2 rounded border transition-colors ${
-                isSelected(tag)
-                  ? 'bg-indigo-100 border-indigo-500 text-indigo-800 cursor-default'
-                  : isTagsLimitReached
-                  ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
-                  : 'bg-white border-gray-300 hover:bg-gray-50 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
-              }`}
-            >
-              {tag.name}
-            </button>
-          ))}
+          {availableUnselectedTags.map(tag => {
+            const isDisabled = isTagsLimitReached;
+            
+            return (
+              <ShakableTag 
+                key={tag.id} 
+                id={tag.id} 
+                disabled={isDisabled}
+              >
+                <button
+                  onClick={() => !isDisabled && handleAddTag(tag)}
+                  disabled={isDisabled}
+                  className={`px-3 py-2 rounded border transition-colors w-full ${
+                    isTagsLimitReached
+                      ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                      : 'bg-white border-gray-300 hover:bg-gray-50 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+                  }`}
+                >
+                  {tag.name}
+                </button>
+              </ShakableTag>
+            );
+          })}
+          
+          {availableUnselectedTags.length === 0 && !isRefetching && (
+            <div className="col-span-2 md:col-span-3 lg:col-span-4 text-gray-500 italic py-4 text-center">
+              Não há mais gêneros disponíveis. Clique em "Novos gêneros" para obter mais opções.
+            </div>
+          )}
+          
+          {isRefetching && (
+            <div className="col-span-2 md:col-span-3 lg:col-span-4 text-gray-500 italic py-4 text-center">
+              Carregando novos gêneros...
+            </div>
+          )}
         </div>
         
         <div className="mt-2 text-sm text-gray-500">

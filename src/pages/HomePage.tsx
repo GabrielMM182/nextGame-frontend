@@ -19,8 +19,11 @@ const HomePage = () => {
   const { 
     data: availableTags, 
     isLoading: isLoadingTags, 
-    error: tagsError 
-  } = useTags(20);
+    error: tagsError,
+    refetch: refetchTags, 
+    isFetching: isRefetchingTags  // Add this line to get the refetching state
+
+  } = useTags(10);
   
   // Mutação para buscar jogos usando o hook customizado
   const { 
@@ -60,7 +63,7 @@ const HomePage = () => {
           </h2>
           
           {availableTags && (
-            <TagSelector availableTags={availableTags} />
+            <TagSelector availableTags={availableTags} refetchTags={refetchTags} isRefetching={isRefetchingTags} />
           )}
           
           <div className="mt-8 flex justify-center">
