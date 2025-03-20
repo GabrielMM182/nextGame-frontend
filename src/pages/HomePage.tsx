@@ -13,7 +13,7 @@ const HomePage = () => {
   const { selectedTags, searchId, setSearchId } = useGameStore();
   
   // Utilizando os hooks customizados
-  const { useTags, useSearchGames } = useGameApi();
+  const { useTags, useSearchGames, useSearchResults } = useGameApi();
   
   // Buscar tags disponíveis com o hook customizado
   const { 
@@ -24,6 +24,9 @@ const HomePage = () => {
     isFetching: isRefetchingTags  // Add this line to get the refetching state
 
   } = useTags(10);
+  
+  // Obter os resultados da busca atual (se houver)
+  const { data: searchResults } = useSearchResults(searchId);
   
   // Mutação para buscar jogos usando o hook customizado
   const { 
@@ -41,12 +44,23 @@ const HomePage = () => {
       onSuccess: (data) => {
         setSearchId(data.searchId);
         setShowResults(true);
+        
+        // Se já tivermos detalhes do jogo e rawgId, podemos navegar diretamente
+        if (data.gameDetails?.rawgId) {
+          navigate(`/game/${data.gameDetails.rawgId}`);
+        }
       }
     });
   };
   
   const viewGameDetails = (gameId: string) => {
-    navigate(`/game/${gameId}`);
+    // Se temos o resultado da busca atual e ele tem um gameDetails com rawgId, usamos ele
+    if (searchResults?.gameDetails?.rawgId) {
+      navigate(`/game/${searchResults.gameDetails.rawgId}`);
+    } else {
+      // Caso contrário, usamos o ID passado (pode ser o ID do MongoDB ou o rawgId)
+      navigate(`/game/${gameId}`);
+    }
   };
   
   if (isLoadingTags) return <LoadingSpinner />;

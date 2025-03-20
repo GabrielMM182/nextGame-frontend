@@ -2,10 +2,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useGameApi } from '../hooks/useGameApi';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
+import { useEffect, useState } from 'react';
+import { GameDetails } from '../types/game';
+import api from '../services/api/axios';
 
 const GameDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [mongoGame, setMongoGame] = useState<{ name: string } | null>(null);
+  const [isMongoLoading, setIsMongoLoading] = useState(false);
+  const [mongoError, setMongoError] = useState<Error | null>(null);
   
   // Utilizando o hook customizado para buscar detalhes do jogo
   const { useGameDetails } = useGameApi();
@@ -15,22 +21,79 @@ const GameDetailsPage = () => {
     error 
   } = useGameDetails(id);
   
-  if (isLoading) return <LoadingSpinner />;
+  // Se não encontrarmos o jogo pela API do RAWG, tenta buscar pelo MongoDB
+  useEffect(() => {
+    if (!isLoading && !game && id) {
+      // Tentamos buscar do MongoDB
+      setIsMongoLoading(true);
+      api.get(`/game/${id}`)
+        .then(response => {
+          if (response.data && response.data.recommendedGame) {
+            setMongoGame({
+              name: response.data.recommendedGame.name || 'Jogo Recomendado'
+            });
+          } else if (response.data && response.data.gameSummary) {
+            setMongoGame({
+              name: response.data.gameSummary.name || 'Jogo Recomendado'
+            });
+          }
+        })
+        .catch(err => {
+          console.error('Erro ao buscar jogo do MongoDB:', err);
+          setMongoError(err as Error);
+        })
+        .finally(() => {
+          setIsMongoLoading(false);
+        });
+    }
+  }, [id, isLoading, game]);
   
-  if (error || !game) return (
-    <div className="container mx-auto px-4 py-12">
-      <ErrorMessage message="Erro ao carregar detalhes do jogo" />
-      <div className="mt-8 flex justify-center">
+  if (isLoading || isMongoLoading) return <LoadingSpinner />;
+  
+  if (!game && !mongoGame) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <ErrorMessage message="Erro ao carregar detalhes do jogo" />
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => navigate('/')}
+            className="bg-indigo-600 text-white px-6 py-2 rounded-lg"
+          >
+            Voltar para a página inicial
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Se temos apenas os dados básicos do MongoDB
+  if (!game && mongoGame) {
+    return (
+      <div className="container mx-auto px-4 py-8">
         <button
           onClick={() => navigate('/')}
-          className="bg-indigo-600 text-white px-6 py-2 rounded-lg"
+          className="mb-6 flex items-center text-indigo-600 hover:text-indigo-800"
         >
-          Voltar para a página inicial
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          Voltar para resultados
         </button>
+        
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden p-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">{mongoGame.name}</h1>
+          <p className="text-gray-700 mb-6">
+            Este é o jogo recomendado com base nos gêneros que você selecionou.
+          </p>
+          <p className="text-gray-600">
+            Não foi possível obter detalhes adicionais deste jogo no momento.
+          </p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
   
+  // Se temos os detalhes completos do RAWG
   return (
     <div className="container mx-auto px-4 py-8">
       <button
@@ -44,7 +107,7 @@ const GameDetailsPage = () => {
       </button>
       
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        {game.background_image && (
+        {game?.background_image && (
           <div className="relative h-80">
             <img 
               src={game.background_image} 
@@ -56,9 +119,9 @@ const GameDetailsPage = () => {
         
         <div className="p-6">
           <div className="flex flex-wrap items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">{game.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{game?.name}</h1>
             
-            {game.metacritic && (
+            {game?.metacritic && (
               <div className={`
                 px-3 py-1 rounded-full font-bold
                 ${game.metacritic >= 80 ? 'bg-green-100 text-green-800' : 
@@ -75,12 +138,12 @@ const GameDetailsPage = () => {
               <h2 className="text-xl font-semibold mb-2">Sobre o jogo</h2>
               <div 
                 className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: game.description }}
+                dangerouslySetInnerHTML={{ __html: game?.description || '' }}
               />
             </div>
             
             <div className="space-y-6">
-              {game.released && (
+              {game?.released && (
                 <div>
                   <h3 className="text-lg font-medium mb-1">Data de lançamento</h3>
                   <p className="text-gray-700">
@@ -89,7 +152,7 @@ const GameDetailsPage = () => {
                 </div>
               )}
               
-              {game.platforms && game.platforms.length > 0 && (
+              {game?.platforms && game.platforms.length > 0 && (
                 <div>
                   <h3 className="text-lg font-medium mb-1">Plataformas</h3>
                   <div className="flex flex-wrap gap-2">
@@ -105,7 +168,7 @@ const GameDetailsPage = () => {
                 </div>
               )}
               
-              {game.genres && game.genres.length > 0 && (
+              {game?.genres && game.genres.length > 0 && (
                 <div>
                   <h3 className="text-lg font-medium mb-1">Gêneros</h3>
                   <div className="flex flex-wrap gap-2">
@@ -123,7 +186,7 @@ const GameDetailsPage = () => {
             </div>
           </div>
           
-          {game.screenshots && game.screenshots.length > 0 && (
+          {game?.screenshots && game.screenshots.length > 0 && (
             <div className="mt-8">
               <h2 className="text-xl font-semibold mb-4">Screenshots</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
