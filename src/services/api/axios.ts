@@ -10,16 +10,13 @@ const api = axios.create({
 // Interceptor para adicionar o token de autenticação
 api.interceptors.request.use((config) => {
   try {
-    // Tentar obter o token do storage direto (oculto)
-    let token = localStorage.getItem('auth-storage-token');
+    // Obter token do estado persistido
+    let token = null;
+    const authStorage = localStorage.getItem('auth-storage');
     
-    if (!token) {
-      // Tentar obter do estado persistido
-      const authStorage = localStorage.getItem('auth-storage');
-      if (authStorage) {
-        const parsed = JSON.parse(authStorage);
-        token = parsed?.state?.token;
-      }
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage);
+      token = parsed?.state?.token;
     }
     
     if (token) {
@@ -27,7 +24,7 @@ api.interceptors.request.use((config) => {
       config.headers = config.headers || {};
       // Definir o token de autorização
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Token adicionado ao cabeçalho da requisição');
+      // console.log('Token adicionado ao cabeçalho da requisição');
     } else {
       console.log('Token não encontrado para requisição');
     }
@@ -41,7 +38,7 @@ api.interceptors.request.use((config) => {
 // Interceptor para logar respostas
 api.interceptors.response.use(
   (response) => {
-    console.log(`Resposta da API (${response.config.url}):`, response.status);
+    // console.log(`Resposta da API (${response.config.url}):`, response.status);
     return response;
   },
   (error) => {

@@ -25,6 +25,17 @@ interface AuthState {
   setToastMessage: (message: ToastMessage | null) => void;
 }
 
+// Função para proteger o ID do usuário
+const maskUserData = (user: User | null): Partial<User> | null => {
+  if (!user) return null;
+  return {
+    email: user.email,
+    name: user.name,
+    nickname: user.nickname,
+    // O ID não é incluído
+  };
+};
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -52,34 +63,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       partialize: (state) => ({ 
-        user: state.user,
+        user: maskUserData(state.user),
+        token: state.token, // Incluir o token no estado principal para persistência
         isAuthenticated: state.isAuthenticated,
       }),
-      storage: createJSONStorage(() => ({
-        getItem: (name) => {
-          const value = localStorage.getItem(name);
-          if (!value) return null;
-          
-          const data = JSON.parse(value);
-          if (data.state && !data.state.token && data.state.isAuthenticated) {
-            data.state.token = localStorage.getItem(`${name}-token`);
-          }
-          return data;
-        },
-        setItem: (name, value) => {
-          const data = JSON.parse(JSON.stringify(value));
-          if (data.state && data.state.token) {
-            const token = data.state.token;
-            delete data.state.token;
-            localStorage.setItem(`${name}-token`, token);
-          }
-          localStorage.setItem(name, JSON.stringify(data));
-        },
-        removeItem: (name) => {
-          localStorage.removeItem(name);
-          localStorage.removeItem(`${name}-token`);
-        },
-      })),
+      storage: createJSONStorage(() => localStorage),
     }
   )
 ); 
