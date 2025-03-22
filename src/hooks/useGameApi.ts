@@ -86,14 +86,26 @@ export const useGameApi = () => {
           
           // Mapear a resposta do backend para o formato esperado pelo frontend
           const backendResponse = response.data;
+          console.log('Resposta do backend para useSearchResults:', backendResponse);
           
           // Criar resposta no formato que o frontend espera
           const frontendResponse: GameSearchResponse = {
-            name: backendResponse.gameSummary?.name || backendResponse.recommendedGame?.name || '',
+            name: backendResponse.recommendedGame?.name || '',
             searchId: backendResponse._id || searchId,
             summary: [], // A estrutura antiga esperava uma lista de jogos
             gameDetails: backendResponse.gameDetails
           };
+          
+          // Se temos recommendedGame mas não temos gameDetails, vamos usar o recommendedGame como base
+          if (backendResponse.recommendedGame && !frontendResponse.gameDetails) {
+            frontendResponse.gameDetails = {
+              name: backendResponse.recommendedGame.name,
+              rawgId: backendResponse.recommendedGame.rawgId,
+              releaseYear: null,
+              platforms: [],
+              images: []
+            };
+          }
           
           // Armazenar detalhes para uso posterior, se disponível
           if (frontendResponse.gameDetails?.rawgId) {
@@ -122,14 +134,26 @@ export const useGameApi = () => {
         
         // Mapear a resposta do backend para o formato esperado pelo frontend
         const backendResponse = response.data;
+        console.log('Resposta do backend para useSearchGames:', backendResponse);
         
         // Criar resposta no formato que o frontend espera
         const frontendResponse: GameSearchResponse = {
-          name: backendResponse.gameSummary.name,
-          searchId: backendResponse.gameId,
+          name: backendResponse.recommendedGame?.name || '',
+          searchId: backendResponse._id || backendResponse.gameId,
           summary: [], // A estrutura antiga esperava uma lista de jogos, mas agora temos apenas um
           gameDetails: backendResponse.gameDetails
         };
+        
+        // Se temos recommendedGame mas não temos gameDetails, vamos usar o recommendedGame como base
+        if (backendResponse.recommendedGame && !frontendResponse.gameDetails) {
+          frontendResponse.gameDetails = {
+            name: backendResponse.recommendedGame.name,
+            rawgId: backendResponse.recommendedGame.rawgId,
+            releaseYear: null,
+            platforms: [],
+            images: []
+          };
+        }
         
         // Se a resposta incluir detalhes do jogo, armazenamos no cache para uso posterior
         if (frontendResponse.gameDetails?.rawgId) {

@@ -7,7 +7,7 @@ import SearchResults from '../components/features/SearchResults';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import ErrorMessage from '../components/common/ErrorMessage';
 
-const HomePage = () => {
+const GamePage = () => {
   const navigate = useNavigate();
   const [showResults, setShowResults] = useState(false);
   const { selectedTags, searchId, setSearchId } = useGameStore();
@@ -21,8 +21,7 @@ const HomePage = () => {
     isLoading: isLoadingTags, 
     error: tagsError,
     refetch: refetchTags, 
-    isFetching: isRefetchingTags  // Add this line to get the refetching state
-
+    isFetching: isRefetchingTags
   } = useTags(10);
   
   // Obter os resultados da busca atual (se houver)
@@ -114,4 +113,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default GamePage; 
