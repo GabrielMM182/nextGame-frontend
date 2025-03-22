@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import LandingPage from './pages/LandingPage';
 import GamePage from './pages/GamePage';
@@ -10,6 +10,8 @@ import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { useAuthStore } from './store/useAuthStore';
 import { useThemeStore } from './store/useThemeStore';
+import ProfilePage from './pages/ProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
@@ -35,38 +37,37 @@ function App() {
   }, [theme]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Rota pública de autenticação - fixada no tema claro */}
-        <Route 
-          path="/auth" 
-          element={
-            <div className="light">
-              {isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
-            </div>
-          } 
-        />
+    <Routes>
+      {/* Rota pública de autenticação - fixada no tema claro */}
+      <Route 
+        path="/auth" 
+        element={
+          <div className="light">
+            {isAuthenticated ? <Navigate to="/" replace /> : <AuthPage />}
+          </div>
+        } 
+      />
 
-        {/* Layout principal */}
-        <Route path="/" element={<Layout />}>
-          {/* Rota pública - página inicial */}
-          <Route index element={<LandingPage />} />
-          
-          {/* Rota pública - sobre o projeto */}
-          <Route path="about" element={<AboutPage />} />
-          
-          {/* Rotas protegidas que requerem autenticação */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="game" element={<GamePage />} />
-            <Route path="game/:id" element={<GameDetailsPage />} />
-            <Route path="history" element={<HistoryPage />} />
-          </Route>
+      {/* Layout principal */}
+      <Route path="/" element={<Layout />}>
+        {/* Rota pública - página inicial */}
+        <Route index element={<LandingPage />} />
+        
+        {/* Rota pública - sobre o projeto */}
+        <Route path="about" element={<AboutPage />} />
+        
+        {/* Rotas protegidas que requerem autenticação */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="game" element={<GamePage />} />
+          <Route path="game/:id" element={<GameDetailsPage />} />
+          <Route path="history" element={<HistoryPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
+      </Route>
 
-        {/* Rota de fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+      {/* Rota de fallback */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 

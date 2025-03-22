@@ -1,13 +1,72 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Confetti from 'react-confetti';
 
 const AboutPage = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+  
+  // Passos do Como Funciona
+  const steps = [
+    {
+      title: "Tecnologia Inteligente",
+      description: "Nossa plataforma utiliza algoritmos de inteligência artificial que analisam milhares de jogos e suas características. Ao selecionar seus gêneros preferidos, nosso sistema identifica padrões e encontra jogos que correspondem às suas preferências específicas."
+    },
+    {
+      title: "Dados Atualizados",
+      description: "Integramos com as mais importantes bases de dados de jogos, incluindo a RAWG, para garantir que nossas recomendações sejam baseadas em informações completas e atualizadas sobre os títulos mais recentes."
+    },
+    {
+      title: "Experiência Personalizada",
+      description: "Cada recomendação é única porque cada jogador é único. Nosso sistema aprende com suas escolhas e histórico de busca para refinar continuamente suas sugestões e torná-las cada vez mais precisas."
+    }
+  ];
+
+  useEffect(() => {
+    // Atualizar tamanho da janela para o confetti
+    const updateWindowSize = () => {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    
+    updateWindowSize();
+    window.addEventListener('resize', updateWindowSize);
+    
+    return () => window.removeEventListener('resize', updateWindowSize);
+  }, []);
+
+  const handleNextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      setIsCompleted(true);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-10 text-gray-800 dark:text-white">Sobre o GameFinder</h1>
         
+        {/* Confetti quando completar o stepper */}
+        {isCompleted && (
+          <Confetti
+            width={windowSize.width}
+            height={windowSize.height}
+            recycle={false}
+            numberOfPieces={500}
+            tweenDuration={10000}
+          />
+        )}
+        
         {/* Missão */}
-        <section className="mb-12 text-center">
+        <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400 text-center">Nossa Missão</h2>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
             <p className="text-gray-700 dark:text-gray-200 mb-4">
@@ -23,38 +82,75 @@ const AboutPage = () => {
           </div>
         </section>
         
-        {/* Como funciona */}
-        <section className="mb-12 text-center">
+        {/* Como funciona - Stepper */}
+        <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400 text-center">Como Funciona</h2>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="mb-6">
-              <h3 className="text-xl font-medium mb-2 text-gray-800 dark:text-white">Tecnologia Inteligente</h3>
-              <p className="text-gray-700 dark:text-gray-200">
-                Nossa plataforma utiliza algoritmos de inteligência artificial que analisam 
-                milhares de jogos e suas características. Ao selecionar seus gêneros 
-                preferidos, nosso sistema identifica padrões e encontra jogos que 
-                correspondem às suas preferências específicas.
-              </p>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="text-xl font-medium mb-2 text-gray-800 dark:text-white">Dados Atualizados</h3>
-              <p className="text-gray-700 dark:text-gray-200">
-                Integramos com as mais importantes bases de dados de jogos, incluindo a 
-                RAWG, para garantir que nossas recomendações sejam baseadas em 
-                informações completas e atualizadas sobre os títulos mais recentes.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="text-xl font-medium mb-2 text-gray-800 dark:text-white">Experiência Personalizada</h3>
-              <p className="text-gray-700 dark:text-gray-200">
-                Cada recomendação é única porque cada jogador é único. Nosso sistema aprende 
-                com suas escolhas e histórico de busca para refinar continuamente suas 
-                sugestões e torná-las cada vez mais precisas.
-              </p>
+          
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="relative pt-1">
+              <div className="flex items-center justify-between mb-2">
+                {steps.map((_, index) => (
+                  <div 
+                    key={index}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      index <= currentStep
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                    } z-10 relative`}
+                  >
+                    {index + 1}
+                  </div>
+                ))}
+              </div>
+              <div className="overflow-hidden h-2 mb-4 flex rounded bg-gray-200 dark:bg-gray-700">
+                <div 
+                  style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+                  className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-600 transition-all duration-500"
+                ></div>
+              </div>
             </div>
           </div>
+          
+          {/* Conteúdo do passo atual */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-all duration-500">
+            <h3 className="text-xl font-medium mb-4 text-gray-800 dark:text-white">
+              {steps[currentStep].title}
+            </h3>
+            <p className="text-gray-700 dark:text-gray-200 mb-6">
+              {steps[currentStep].description}
+            </p>
+            
+            {/* Botões de navegação */}
+            <div className="flex justify-between mt-6">
+              <button 
+                onClick={handlePrevStep} 
+                disabled={currentStep === 0}
+                className={`px-4 py-2 rounded-lg ${
+                  currentStep === 0
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-600 text-white hover:bg-gray-700'
+                }`}
+              >
+                Anterior
+              </button>
+              
+              <button 
+                onClick={handleNextStep}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
+                {currentStep === steps.length - 1 ? "Concluir" : "Próximo"}
+              </button>
+            </div>
+          </div>
+          
+          {/* Mensagem de conclusão */}
+          {isCompleted && (
+            <div className="mt-6 p-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-center animate-fade-in">
+              <p className="font-medium">Parabéns por aprender como funciona o GameFinder!</p>
+              <p>Agora você já pode começar a explorar e encontrar seus jogos favoritos.</p>
+            </div>
+          )}
         </section>
         
         {/* Benefícios */}

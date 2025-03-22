@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useAuthApi } from '../hooks/useAuthApi';
 import { loginSchema, registerSchema, LoginFormValues, RegisterFormValues } from '../validations/authValidations';
+import { Toast, useToast } from '../components/ui/Toast';
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const AuthPage = () => {
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { useLoginMutation, useRegisterMutation } = useAuthApi();
+  const { toast, toastProps, open, setOpen } = useToast();
   
   // Mutations
   const { mutate: login, isPending: isLoggingIn, error: loginError } = useLoginMutation();
@@ -39,8 +41,24 @@ const AuthPage = () => {
   
   const handleLoginSubmit = (data: LoginFormValues) => {
     login(data, {
-      onSuccess: () => {
-        navigate('/');
+      onSuccess: (userData) => {
+        // Exibir toast de boas-vindas se o usuário possuir um nome
+        if (userData?.user?.name) {
+          toast({
+            title: `Bem-vindo ${userData.user.name}!`,
+            description: 'Login realizado com sucesso',
+            variant: 'success',
+            duration: 4000,
+          });
+          
+          // Pequeno delay antes do redirecionamento para garantir que o toast seja visualizado
+          setTimeout(() => {
+            navigate('/');
+          }, 3000);
+        } else {
+          // Caso não tenha nome, apenas redireciona
+          navigate('/');
+        }
       },
     });
   };
@@ -53,7 +71,7 @@ const AuthPage = () => {
         password: data.password,
       },
       {
-        onSuccess: (data) => {
+        onSuccess: (userData) => {
           // Após o registro, faz login automaticamente
           login(
             { 
@@ -62,6 +80,13 @@ const AuthPage = () => {
             },
             {
               onSuccess: () => {
+                // Exibir toast de boas-vindas após o registro
+                toast({
+                  title: `Bem-vindo ${data.name}!`,
+                  description: 'Sua conta foi criada com sucesso',
+                  variant: 'success',
+                  duration: 4000,
+                });
                 navigate('/');
               },
             }
@@ -114,7 +139,7 @@ const AuthPage = () => {
                 <input
                   id="email"
                   type="email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  className="text-gray-500 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   placeholder="seu@email.com"
                   {...loginForm.register('email')}
                 />
@@ -129,7 +154,7 @@ const AuthPage = () => {
                 <input
                   id="password"
                   type={showLoginPassword ? "text" : "password"}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  className="text-gray-500 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   placeholder="••••••"
                   {...loginForm.register('password')}
                 />
@@ -194,7 +219,7 @@ const AuthPage = () => {
                 <input
                   id="name"
                   type="text"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  className="text-gray-500 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   placeholder="Seu nome"
                   {...registerForm.register('name')}
                 />
@@ -209,7 +234,7 @@ const AuthPage = () => {
                 <input
                   id="reg-email"
                   type="email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  className="text-gray-500 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   placeholder="seu@email.com"
                   {...registerForm.register('email')}
                 />
@@ -224,7 +249,7 @@ const AuthPage = () => {
                 <input
                   id="reg-password"
                   type={showRegisterPassword ? "text" : "password"}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  className="text-gray-500 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   placeholder="Mínimo 6 caracteres"
                   {...registerForm.register('password')}
                 />
@@ -255,7 +280,7 @@ const AuthPage = () => {
                 <input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  className="text-gray-500 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   placeholder="Confirmar senha"
                   {...registerForm.register('confirmPassword')}
                 />
@@ -313,6 +338,16 @@ const AuthPage = () => {
           )}
         </div>
       </div>
+
+      {/* Toast component */}
+      <Toast
+        open={open}
+        setOpen={setOpen}
+        title={toastProps.title}
+        description={toastProps.description}
+        variant={toastProps.variant}
+        duration={toastProps.duration}
+      />
     </div>
   );
 };
