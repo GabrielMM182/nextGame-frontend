@@ -67,11 +67,11 @@ const GamePage = () => {
   
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Recomendação de Jogos</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white">Recomendação de Jogos</h1>
       
       {!showResults ? (
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-xl font-semibold mb-4">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
             Selecione até 6 gêneros de jogos que você gosta
           </h2>
           
@@ -83,14 +83,14 @@ const GamePage = () => {
             <button
               onClick={handleSearch}
               disabled={selectedTags.length === 0 || isSearching}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:text-gray-200 disabled:cursor-not-allowed transition-colors"
             >
               {isSearching ? 'Buscando...' : 'Buscar Recomendações'}
             </button>
           </div>
           
           {searchError && (
-            <div className="mt-4 text-red-600 text-center">
+            <div className="mt-4 text-red-600 dark:text-red-400 text-center">
               Ocorreu um erro na busca. Tente novamente.
             </div>
           )}
@@ -102,7 +102,7 @@ const GamePage = () => {
           <div className="mt-8 flex justify-center">
             <button
               onClick={() => setShowResults(false)}
-              className="bg-gray-200 px-6 py-3 rounded-lg font-medium hover:bg-gray-300"
+              className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               Nova Busca
             </button>

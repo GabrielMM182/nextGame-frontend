@@ -8,12 +8,21 @@ export interface User {
   nickname: string;
 }
 
+export interface ToastMessage {
+  title: string;
+  description: string;
+  variant: 'success' | 'error' | 'warning' | 'info';
+  duration?: number;
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  toastMessage: ToastMessage | null;
   login: (userData: { token: string; user: User }) => void;
   logout: () => void;
+  setToastMessage: (message: ToastMessage | null) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -22,6 +31,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      toastMessage: null,
       
       login: ({ token, user }) => set({
         user,
@@ -33,6 +43,10 @@ export const useAuthStore = create<AuthState>()(
         user: null,
         token: null,
         isAuthenticated: false,
+      }),
+
+      setToastMessage: (message) => set({
+        toastMessage: message
       }),
     }),
     {

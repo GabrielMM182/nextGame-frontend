@@ -2,6 +2,8 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useAuthApi } from '../../hooks/useAuthApi';
 import GameControlThemeToggle from '../ui/GameControlThemeToggle';
+import ToastContainer from '../ui/ToastContainer';
+import ThemeToggle from '../ui/ThemeToggle';
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -20,100 +22,104 @@ const Layout = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link to="/" className="text-white text-2xl font-bold">GameFinder</Link>
-            <nav className="flex items-center">
-              <ul className="flex items-center space-x-6">
-                <li>
-                  <Link to="/" className="text-indigo-100 hover:text-white">
-                    Home
+            
+            <div className="flex items-center space-x-4">
+              {/* <GameControlThemeToggle /> */}
+              <ThemeToggle/>
+
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <Link 
+                    to="/game" 
+                    className="text-white hover:text-indigo-200 transition-colors"
+                  >
+                    Explorar
                   </Link>
-                </li>
-                
-                <li>
-                  <Link to="/game" className="text-indigo-100 hover:text-white">
-                    Jogos
+                  
+                  <Link 
+                    to="/history" 
+                    className="text-white hover:text-indigo-200 transition-colors"
+                  >
+                    Histórico
                   </Link>
-                </li>
-                
-                {isAuthenticated && (
-                  <li>
-                    <Link to="/history" className="text-indigo-100 hover:text-white">
-                      Histórico
-                    </Link>
-                  </li>
-                )}
-                
-                <li>
-                  <Link to="/about" className="text-indigo-100 hover:text-white">
+
+                  <Link 
+                    to="/about" 
+                    className="text-white hover:text-indigo-200 transition-colors"
+                  >
                     Sobre
                   </Link>
-                </li>
-                
-                <li className="ml-2">
-                  <GameControlThemeToggle />
-                </li>
-                
-                {isAuthenticated ? (
-                  <>
-                    <li className="border-l pl-6 border-indigo-400">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-indigo-400 flex items-center justify-center text-white font-medium mr-2">
-                          {user?.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-white text-sm">{user?.name}</p>
-                          <p className="text-indigo-200 text-xs">{user?.nickname}</p>
-                        </div>
+                  
+                  <div className="relative group">
+                    <button className="text-white hover:text-indigo-200 flex items-center transition-colors">
+                      <span className="mr-1">{user?.name || 'Usuário'}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-10 transition-all duration-200 transform scale-0 opacity-0 origin-top-right group-hover:scale-100 group-hover:opacity-100">
+                      <div className="py-2">
+                        <Link 
+                          to="/profile" 
+                          className="block px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-indigo-500 hover:text-white transition-colors"
+                        >
+                          Perfil
+                        </Link>
+                        
+                        <button 
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-gray-800 dark:text-gray-200 hover:bg-indigo-500 hover:text-white transition-colors"
+                        >
+                          Sair
+                        </button>
                       </div>
-                    </li>
-                    <li>
-                      <button 
-                        onClick={handleLogout}
-                        className="bg-indigo-700 dark:bg-indigo-800 text-white px-4 py-2 rounded hover:bg-indigo-800 dark:hover:bg-indigo-700 transition-colors duration-200"
-                      >
-                        Sair
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <li>
-                    <Link 
-                      to="/auth"
-                      className="bg-white text-indigo-600 dark:bg-indigo-300 dark:text-indigo-800 px-4 py-2 rounded hover:bg-indigo-50 dark:hover:bg-indigo-200 transition-colors duration-200"
-                    >
-                      Login
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </nav>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Link 
+                  to="/auth" 
+                  className="text-white hover:text-indigo-200 transition-colors"
+                >
+                  Entrar
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </header>
       
-      <main className="dark:text-gray-100 transition-colors duration-200">
+      <main className="py-8">
         <Outlet />
       </main>
       
-      <footer className="bg-gray-800 dark:bg-gray-950 text-white mt-12 transition-colors duration-200">
-        <div className="container mx-auto px-4 py-6">
+      <footer className="bg-gray-100 dark:bg-gray-800 py-6 transition-colors duration-200">
+        <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <p>&copy; {new Date().getFullYear()} GameFinder. Todos os direitos reservados.</p>
+              <p className="text-gray-600 dark:text-gray-300">
+                © 2023 GameFinder. Todos os direitos reservados.
+              </p>
             </div>
+            
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">
-                Termos de Uso
+              <Link to="/about" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                Sobre
+              </Link>
+              <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                Termos
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">
+              <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                 Privacidade
-              </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200">
-                Contato
               </a>
             </div>
           </div>
         </div>
       </footer>
+      
+      {/* Toast global */}
+      <ToastContainer />
     </div>
   );
 };

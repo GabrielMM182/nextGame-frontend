@@ -98,7 +98,7 @@ const GameDetailsPage = () => {
     <div className="container mx-auto px-4 py-8">
       <button
         onClick={() => navigate('/')}
-        className="mb-6 flex items-center text-indigo-600 hover:text-indigo-800"
+        className="mb-6 flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -106,7 +106,7 @@ const GameDetailsPage = () => {
         Voltar para resultados
       </button>
       
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
         {game?.background_image && (
           <div className="relative h-80">
             <img 
@@ -119,14 +119,14 @@ const GameDetailsPage = () => {
         
         <div className="p-6">
           <div className="flex flex-wrap items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">{game?.name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{game?.name}</h1>
             
             {game?.metacritic && (
               <div className={`
                 px-3 py-1 rounded-full font-bold
-                ${game.metacritic >= 80 ? 'bg-green-100 text-green-800' : 
-                  game.metacritic >= 60 ? 'bg-yellow-100 text-yellow-800' : 
-                  'bg-red-100 text-red-800'}
+                ${game.metacritic >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                  game.metacritic >= 60 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 
+                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}
               `}>
                 Metacritic: {game.metacritic}
               </div>
@@ -135,9 +135,9 @@ const GameDetailsPage = () => {
           
           <div className="grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <h2 className="text-xl font-semibold mb-2">Sobre o jogo</h2>
+              <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">Sobre o jogo</h2>
               <div 
-                className="prose max-w-none"
+                className="prose dark:prose-invert max-w-none dark:text-gray-300"
                 dangerouslySetInnerHTML={{ __html: game?.description || '' }}
               />
             </div>
@@ -145,8 +145,8 @@ const GameDetailsPage = () => {
             <div className="space-y-6">
               {game?.released && (
                 <div>
-                  <h3 className="text-lg font-medium mb-1">Data de lançamento</h3>
-                  <p className="text-gray-700">
+                  <h3 className="text-lg font-medium mb-1 text-gray-800 dark:text-gray-100">Data de lançamento</h3>
+                  <p className="text-gray-700 dark:text-gray-300">
                     {new Date(game.released).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -154,12 +154,12 @@ const GameDetailsPage = () => {
               
               {game?.platforms && game.platforms.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-medium mb-1">Plataformas</h3>
+                  <h3 className="text-lg font-medium mb-1 text-gray-800 dark:text-gray-100">Plataformas</h3>
                   <div className="flex flex-wrap gap-2">
                     {game.platforms.map((platform, index) => (
                       <span 
                         key={index}
-                        className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm"
+                        className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm"
                       >
                         {platform}
                       </span>
@@ -170,12 +170,12 @@ const GameDetailsPage = () => {
               
               {game?.genres && game.genres.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-medium mb-1">Gêneros</h3>
+                  <h3 className="text-lg font-medium mb-1 text-gray-800 dark:text-gray-100">Gêneros</h3>
                   <div className="flex flex-wrap gap-2">
                     {game.genres.map((genre, index) => (
                       <span 
                         key={index}
-                        className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-sm"
+                        className="bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded text-sm"
                       >
                         {genre}
                       </span>
@@ -188,7 +188,7 @@ const GameDetailsPage = () => {
           
           {game?.screenshots && game.screenshots.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-4">Screenshots</h2>
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Screenshots</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {game.screenshots.map((screenshot, index) => (
                   <img 

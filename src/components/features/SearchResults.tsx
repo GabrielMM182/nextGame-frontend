@@ -72,8 +72,8 @@ const SearchResults = ({ searchId, onGameClick }: SearchResultsProps) => {
                 className="w-full h-64 object-cover"
               />
             ) : (
-              <div className="w-full h-64 bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-600">Imagem não disponível</span>
+              <div className="w-full h-64 bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center">
+                <span className="text-white text-xl font-semibold">{gameResults.gameDetails.name || 'Jogo Recomendado'}</span>
               </div>
             )}
             

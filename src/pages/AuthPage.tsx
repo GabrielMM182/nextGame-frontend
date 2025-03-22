@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { useAuthApi } from '../hooks/useAuthApi';
+import { useAuthStore } from '../store/useAuthStore';
 import { loginSchema, registerSchema, LoginFormValues, RegisterFormValues } from '../validations/authValidations';
-import { Toast, useToast } from '../components/ui/Toast';
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const AuthPage = () => {
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { useLoginMutation, useRegisterMutation } = useAuthApi();
-  const { toast, toastProps, open, setOpen } = useToast();
+  const { setToastMessage } = useAuthStore();
   
   // Mutations
   const { mutate: login, isPending: isLoggingIn, error: loginError } = useLoginMutation();
@@ -44,22 +44,24 @@ const AuthPage = () => {
       onSuccess: (userData) => {
         // Exibir toast de boas-vindas se o usuário possuir um nome
         if (userData?.user?.name) {
-          toast({
+          setToastMessage({
             title: `Bem-vindo ${userData.user.name}!`,
             description: 'Login realizado com sucesso',
             variant: 'success',
             duration: 4000,
           });
-          
-          // Pequeno delay antes do redirecionamento para garantir que o toast seja visualizado
-          setTimeout(() => {
-            navigate('/');
-          }, 3000);
-        } else {
-          // Caso não tenha nome, apenas redireciona
-          navigate('/');
         }
+        navigate('/');
       },
+      onError: () => {
+        // Toast negativo para erro de login
+        setToastMessage({
+          title: 'Erro ao fazer login',
+          description: 'Verifique seu email e senha e tente novamente',
+          variant: 'error',
+          duration: 4000,
+        });
+      }
     });
   };
   
@@ -81,7 +83,7 @@ const AuthPage = () => {
             {
               onSuccess: () => {
                 // Exibir toast de boas-vindas após o registro
-                toast({
+                setToastMessage({
                   title: `Bem-vindo ${data.name}!`,
                   description: 'Sua conta foi criada com sucesso',
                   variant: 'success',
@@ -89,9 +91,28 @@ const AuthPage = () => {
                 });
                 navigate('/');
               },
+              onError: () => {
+                // Caso ocorra erro no login automático após o registro
+                setToastMessage({
+                  title: 'Conta criada com sucesso',
+                  description: 'Por favor, faça login com suas credenciais',
+                  variant: 'info',
+                  duration: 4000,
+                });
+                setIsLogin(true);
+              }
             }
           );
         },
+        onError: () => {
+          // Toast negativo para erro de registro
+          setToastMessage({
+            title: 'Erro ao criar conta',
+            description: 'Este email já pode estar em uso ou ocorreu um problema no servidor',
+            variant: 'error',
+            duration: 4000,
+          });
+        }
       }
     );
   };
@@ -338,16 +359,6 @@ const AuthPage = () => {
           )}
         </div>
       </div>
-
-      {/* Toast component */}
-      <Toast
-        open={open}
-        setOpen={setOpen}
-        title={toastProps.title}
-        description={toastProps.description}
-        variant={toastProps.variant}
-        duration={toastProps.duration}
-      />
     </div>
   );
 };
